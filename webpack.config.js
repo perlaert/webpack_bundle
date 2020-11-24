@@ -4,9 +4,8 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const FriendlyErrorsWebpackPlugin = require("friendly-errors-webpack-plugin");
 const WebpackBar = require("webpackbar");
 
-const loadModeConfig = (env) => {
-  require(`./built-utils/${env.mode}.config`)(env);
-};
+const loadModeConfig = (env) =>
+  require(`./build-utils/${env.mode}.config.js`)(env);
 
 module.exports = (env) =>
   merge(
@@ -17,14 +16,18 @@ module.exports = (env) =>
       entry: "./index.js",
       output: {
         path: path.resolve(__dirname, "dist"),
-        filenamr: "[name].bundle.js",
+        filename: "[name].bundle.js",
       },
       module: {
         rules: [
           {
-            test: /\.js$/, // регулярное выражение
-            exclude: /node_modules/, // через указ папку свойства не прогонять
+            test: /\.js$/,
+            exclude: /node_modules/,
             use: ["babel-loader"],
+          },
+          {
+            test: /\.html$/,
+            use: ["html-loader"],
           },
           {
             test: /\.(gif|png|jpe?g|svg)$/,
@@ -33,23 +36,22 @@ module.exports = (env) =>
                 loader: "url-loader",
                 options: {
                   name: "[path]/[name].[ext]",
-                  limit: 5000,
+                  limit: false,
                 },
               },
             ],
-          },
-          {
-            test: /\.html$/,
-            use: ["html-loader"],
           },
           {
             test: /\.hbs$/,
             use: ["handlebars-loader"],
           },
         ],
-        // плагины применяются к результирующему бандлу
       },
-      plugins: [new CleanWebpackPlugin(), new FriendlyErrorsWebpackPlugin(), new WebpackBar()],
+      plugins: [
+        new CleanWebpackPlugin(),
+        new FriendlyErrorsWebpackPlugin(),
+        new WebpackBar(),
+      ],
     },
-    loadModeConfig(env)
+    loadModeConfig(env),
   );
